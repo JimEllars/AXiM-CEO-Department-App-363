@@ -78,7 +78,7 @@ async function parseVerifiedRequest(
 
   return valid
     ? { payload }
-    : json({ error: 'Invalid webhook signature' }, 401);
+    : json({ error: 'Unauthorized: Invalid webhook signature' }, 401);
 }
 
 async function handleCoreWebhook(request: Request, env: Env): Promise<Response> {
@@ -168,9 +168,43 @@ async function handleApproval(request: Request, env: Env): Promise<Response> {
   }, 200);
 }
 
+
+const RATE_LIMIT_WINDOW_MS = 10 * 1000;
+const RATE_LIMIT_MAX_REQUESTS = 20;
+const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
+
+function checkRateLimit(ip: string): boolean {
+  const now = Date.now();
+
+  // Lazy cleanup
+  for (const [key, value] of rateLimitMap.entries()) {
+    if (value.expiresAt < now) {
+      rateLimitMap.delete(key);
+    }
+  }
+
+  const record = rateLimitMap.get(ip);
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, expiresAt: now + RATE_LIMIT_WINDOW_MS });
+    return true; // allowed
+  }
+
+  if (record.count >= RATE_LIMIT_MAX_REQUESTS) {
+    return false; // rate limited
+  }
+
+  record.count++;
+  return true; // allowed
+}
+
 export default {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const startTime = Date.now();
+
+    const ip = request.headers.get('cf-connecting-ip');
+    if (ip && !checkRateLimit(ip)) {
+      return json({ error: 'Too Many Requests' }, 429);
+    }
     const url = new URL(request.url);
     const origin = request.headers.get('Origin');
     const headers = corsHeaders(origin, env);
