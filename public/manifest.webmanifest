@@ -1,0 +1,10 @@
+{
+  "name": "AXiM CEO Department Hub",
+  "short_name": "AXiM CEO",
+  "description": "Internal executive command and telemetry hub.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#07100f",
+  "theme_color": "#07100f",
+  "icons": []
+}

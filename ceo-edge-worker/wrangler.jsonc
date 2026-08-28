@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ceo-edge-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-29",
+  "workers_dev": true,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "ENVIRONMENT": "development",
+    "CEO_APP_ORIGIN": "https://ceo.axim.us.com",
+    "EMAILIT_API_URL": "https://api.emailit.com/v1/emails",
+    "EMAIL_FROM": "AXiM Executive Alerts <alerts@example.com>"
+  }
+}
