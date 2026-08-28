@@ -5,7 +5,7 @@ const TIMEOUT_MS = 3000;
 export class ExecutiveMailer {
   constructor(private readonly env: Env) {}
 
-  async sendAlert(payload: MailPayload): Promise&lt;{ provider: string; id?: string }&gt; {
+  async sendAlert(payload: MailPayload): Promise<{ provider: string; id?: string }> {
     const html = this.withActionButton(payload.html, payload.hitlToken);
 
     try {
@@ -27,14 +27,14 @@ export class ExecutiveMailer {
 
     const url = `https://ceo.axim.us.com/api/v1/approve?token=${encodeURIComponent(token)}`;
     return `${html}
-      &lt;div style="padding:24px 0;text-align:center"&gt;
-        &lt;a href="${url}" style="display:inline-block;padding:14px 22px;border-radius:8px;background:#66e3a4;color:#07100f;font-family:Arial,sans-serif;font-weight:700;text-decoration:none"&gt;
+      <div style="padding:24px 0;text-align:center">
+        <a href="${url}" style="display:inline-block;padding:14px 22px;border-radius:8px;background:#66e3a4;color:#07100f;font-family:Arial,sans-serif;font-weight:700;text-decoration:none">
           Review executive directive
-        &lt;/a&gt;
-      &lt;/div&gt;`;
+        </a>
+      </div>`;
   }
 
-  private async sendEmailit(payload: MailPayload): Promise&lt;{ provider: string; id?: string }&gt; {
+  private async sendEmailit(payload: MailPayload): Promise<{ provider: string; id?: string }> {
     const response = await this.fetchWithTimeout(this.env.EMAILIT_API_URL, {
       method: 'POST',
       headers: {
@@ -57,7 +57,7 @@ export class ExecutiveMailer {
     return { provider: 'emailit', id: result.id };
   }
 
-  private async sendResend(payload: MailPayload): Promise&lt;{ provider: string; id?: string }&gt; {
+  private async sendResend(payload: MailPayload): Promise<{ provider: string; id?: string }> {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -80,7 +80,7 @@ export class ExecutiveMailer {
     return { provider: 'resend', id: result.id };
   }
 
-  private async fetchWithTimeout(url: string, init: RequestInit): Promise&lt;Response&gt; {
+  private async fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 

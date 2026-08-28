@@ -7,6 +7,12 @@
   "observability": {
     "enabled": true
   },
+  "kv_namespaces": [
+    {
+      "binding": "TELEMETRY_KV",
+      "id": "mock_id"
+    }
+  ],
   "vars": {
     "ENVIRONMENT": "development",
     "CEO_APP_ORIGIN": "https://ceo.axim.us.com",

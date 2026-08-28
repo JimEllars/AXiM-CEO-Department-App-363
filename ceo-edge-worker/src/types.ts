@@ -6,6 +6,7 @@ export interface Env {
   EMAILIT_API_URL: string;
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
+  TELEMETRY_KV: KVNamespace;
 }
 
 export interface CoreEvent {
