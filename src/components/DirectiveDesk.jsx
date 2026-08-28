@@ -3,14 +3,17 @@ import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { directives as initialDirectives } from '../data/dashboardData';
 import { readPersistedState, writePersistedState } from '../utils/persistedState';
+import { resolveDirective } from '../services/ceoApi';
 
-const { FiCheck, FiClock, FiMessageSquare, FiX } = FiIcons;
+const { FiCheck, FiClock, FiMessageSquare, FiX, FiInfo, FiAlertCircle } = FiIcons;
 
 function DirectiveDesk() {
   const [directives, setDirectives] = useState(() =>
     readPersistedState('pending-directives', initialDirectives)
   );
   const [context, setContext] = useState(null);
+  const [loadingMap, setLoadingMap] = useState({});
+  const [notification, setNotification] = useState(null);
   const closeButtonRef = useRef(null);
 
   useEffect(() => {
@@ -30,9 +33,19 @@ function DirectiveDesk() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [context]);
 
-  const resolve = (title) => {
-    setDirectives((items) => items.filter((item) => item.title !== title));
-    setContext(null);
+  const handleResolve = async (title, resolution) => {
+    setLoadingMap((prev) => ({ ...prev, [title]: true }));
+    try {
+      await resolveDirective(title, resolution);
+      setDirectives((items) => items.filter((item) => item.title !== title));
+      setNotification({ type: 'success', text: `Successfully processed: ${resolution}` });
+      if (context?.title === title) setContext(null);
+    } catch (error) {
+      setNotification({ type: 'error', text: error.message || 'Failed to process action.' });
+    } finally {
+      setLoadingMap((prev) => ({ ...prev, [title]: false }));
+      setTimeout(() => setNotification(null), 4000);
+    }
   };
 
   return (
@@ -44,6 +57,14 @@ function DirectiveDesk() {
         </div>
         <span className="alert-count">{directives.length}</span>
       </div>
+
+      {notification && (
+        <div className={`notification-banner ${notification.type}`} style={{ padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: notification.type === 'error' ? '#fee2e2' : '#dcfce7', color: notification.type === 'error' ? '#991b1b' : '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+          <SafeIcon icon={notification.type === 'error' ? FiAlertCircle : FiCheck} />
+          {notification.text}
+        </div>
+      )}
+
       <div className="directive-list">
         {directives.length === 0 && (
           <div className="empty-state">
@@ -67,13 +88,15 @@ function DirectiveDesk() {
                 className="secondary-button"
                 type="button"
                 onClick={() => setContext(item)}
+                disabled={loadingMap[item.title]}
               >
                 <SafeIcon icon={FiMessageSquare} /> Context
               </button>
               <button
                 className="approve-button"
                 type="button"
-                onClick={() => resolve(item.title)}
+                onClick={() => handleResolve(item.title, 'APPROVE')}
+                disabled={loadingMap[item.title]}
               >
                 <SafeIcon icon={FiCheck} /> Approve
               </button>
@@ -102,13 +125,33 @@ function DirectiveDesk() {
             <span className="kicker">{context.source} directive</span>
             <h3 id="directive-title">{context.title}</h3>
             <p>{context.context}</p>
-            <button
-              className="approve-button"
-              type="button"
-              onClick={() => resolve(context.title)}
-            >
-              <SafeIcon icon={FiCheck} /> Approve directive
-            </button>
+            <div className="modal-actions" style={{ display: 'flex', gap: '0.5rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
+              <button
+                className="approve-button"
+                type="button"
+                onClick={() => handleResolve(context.title, 'APPROVE')}
+                disabled={loadingMap[context.title]}
+              >
+                <SafeIcon icon={FiCheck} /> Approve
+              </button>
+              <button
+                className="secondary-button"
+                style={{ backgroundColor: '#fee2e2', color: '#991b1b', borderColor: '#f87171' }}
+                type="button"
+                onClick={() => handleResolve(context.title, 'REJECT')}
+                disabled={loadingMap[context.title]}
+              >
+                <SafeIcon icon={FiX} /> Reject
+              </button>
+              <button
+                className="secondary-button"
+                type="button"
+                onClick={() => handleResolve(context.title, 'REQUEST_INFO')}
+                disabled={loadingMap[context.title]}
+              >
+                <SafeIcon icon={FiInfo} /> Request Info
+              </button>
+            </div>
           </div>
         </div>
       )}

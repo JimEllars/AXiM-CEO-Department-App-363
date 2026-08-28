@@ -89,6 +89,25 @@ export async function fetchWorkerHealth(signal) {
   });
 }
 
+
+export async function resolveDirective(actionId, resolution, sessionToken) {
+  if (!workerUrl) {
+    throw new Error('Worker URL not configured');
+  }
+
+  const authHeader = sessionToken ? { Authorization: `Bearer ${sessionToken}` } : getAuthHeaders();
+
+  return requestJson(`${workerUrl}/api/v1/hitl-resolve`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...authHeader
+    },
+    body: JSON.stringify({ action_id: actionId, resolution })
+  });
+}
+
 export function hasWorkerConnection() {
   return Boolean(workerUrl);
 }
