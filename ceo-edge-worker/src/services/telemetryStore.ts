@@ -10,7 +10,7 @@ export interface StoredTelemetry {
 }
 
 async function getEvents(env: Env): Promise<StoredTelemetry[]> {
-  const data = await env.TELEMETRY_KV.get(KV_KEY);
+  const data = await env.CEO_TELEMETRY_KV.get(KV_KEY);
   if (!data) return [];
   try {
     return JSON.parse(data) as StoredTelemetry[];
@@ -20,7 +20,7 @@ async function getEvents(env: Env): Promise<StoredTelemetry[]> {
 }
 
 async function saveEvents(env: Env, events: StoredTelemetry[]): Promise<void> {
-  await env.TELEMETRY_KV.put(KV_KEY, JSON.stringify(events));
+  await env.CEO_TELEMETRY_KV.put(KV_KEY, JSON.stringify(events));
 }
 
 export async function addTelemetry(env: Env, event: CoreEvent): Promise<StoredTelemetry> {
@@ -32,11 +32,9 @@ export async function addTelemetry(env: Env, event: CoreEvent): Promise<StoredTe
   };
 
   events.unshift(record);
-  if (events.length > MAX_EVENTS) {
-    events.length = MAX_EVENTS;
-  }
+  const eventsToSave = events.slice(0, MAX_EVENTS);
 
-  await saveEvents(env, events);
+  await saveEvents(env, eventsToSave);
   return record;
 }
 
