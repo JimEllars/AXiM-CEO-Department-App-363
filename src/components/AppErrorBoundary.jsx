@@ -21,9 +21,10 @@ class AppErrorBoundary extends React.Component {
     console.error('AXiM application error', error, info);
   }
 
-  reset = () => {
+  reset() {
     this.setState({ hasError: false, message: '' });
-  };
+  }
+
 
   render() {
     if (!this.state.hasError) {
@@ -43,7 +44,7 @@ class AppErrorBoundary extends React.Component {
             remains available.
           </p>
           <code>{this.state.message}</code>
-          <button className="primary-button" type="button" onClick={this.reset}>
+          <button className="primary-button" type="button" onClick={this.reset.bind(this)}>
             <SafeIcon icon={FiRefreshCw} />
             Try again
           </button>

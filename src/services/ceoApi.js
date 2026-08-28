@@ -41,10 +41,16 @@ export async function fetchMetrics(signal) {
     return [];
   }
 
-  return requestJson(`${workerUrl}/api/v1/metrics`, {
-    signal,
-    headers: { Accept: "application/json" }
-  });
+  try {
+    const data = await requestJson(`${workerUrl}/api/v1/metrics`, {
+      signal,
+      headers: { Accept: "application/json" }
+    });
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    if (error.name !== 'AbortError') console.error('fetchMetrics error:', error);
+    return [];
+  }
 }
 
 export async function fetchTelemetry(signal) {
@@ -52,10 +58,19 @@ export async function fetchTelemetry(signal) {
     return { events: [], volatile: true, unavailable: true };
   }
 
-  return requestJson(`${workerUrl}/api/v1/telemetry?limit=25`, {
-    signal,
-    headers: { Accept: 'application/json' }
-  });
+  try {
+    const data = await requestJson(`${workerUrl}/api/v1/telemetry?limit=25`, {
+      signal,
+      headers: { Accept: 'application/json' }
+    });
+    return {
+      ...data,
+      events: Array.isArray(data?.events) ? data.events : []
+    };
+  } catch (error) {
+    if (error.name !== 'AbortError') console.error('fetchTelemetry error:', error);
+    return { events: [], volatile: true, unavailable: true };
+  }
 }
 
 export async function fetchWorkerHealth(signal) {
