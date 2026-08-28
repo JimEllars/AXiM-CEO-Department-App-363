@@ -169,6 +169,16 @@ async function handleApproval(request: Request, env: Env): Promise<Response> {
 }
 
 
+
+function verifyClientAuth(request: Request, env: Env): boolean {
+  const authHeader = request.headers.get('Authorization');
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  const token = authHeader.substring(7);
+  return token === env.CEO_CLIENT_SECRET;
+}
+
 const RATE_LIMIT_WINDOW_MS = 10 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 20;
 const rateLimitMap = new Map<string, { count: number; expiresAt: number }>();
@@ -224,9 +234,17 @@ export default {
       if (request.method === 'GET' && url.pathname === '/health') {
         response = json({ status: 'healthy', service: 'ceo-edge-worker' }, 200);
       } else if (request.method === 'GET' && url.pathname === '/api/v1/metrics') {
-        response = json(getMetrics(), 200);
+        if (!verifyClientAuth(request, env)) {
+          response = json({ error: 'Unauthorized' }, 401);
+        } else {
+          response = json(getMetrics(), 200);
+        }
       } else if (request.method === 'GET' && url.pathname === '/api/v1/telemetry') {
-        response = await handleTelemetry(request, env);
+        if (!verifyClientAuth(request, env)) {
+          response = json({ error: 'Unauthorized' }, 401);
+        } else {
+          response = await handleTelemetry(request, env);
+        }
       } else if (request.method === 'GET' && url.pathname === '/api/v1/approve') {
         response = await handleApproval(request, env);
       } else if (request.method === 'POST' && url.pathname === '/api/v1/core-webhook') {
