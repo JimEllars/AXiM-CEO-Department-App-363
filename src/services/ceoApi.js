@@ -114,6 +114,6 @@ export function hasWorkerConnection() {
 
 function getAuthHeaders() {
   const session = readSession();
-  const token = session?.token || import.meta.env.VITE_CEO_CLIENT_SECRET;
+  const token = session?.token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
