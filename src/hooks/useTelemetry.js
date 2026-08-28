@@ -38,8 +38,13 @@ export function useTelemetry() {
       setLastUpdated(new Date());
     } catch (requestError) {
       if (requestError.name !== 'AbortError') {
-        setStatus('offline');
-        setError('Worker telemetry is unavailable.');
+        if (requestError.message === 'Unauthorized') {
+          setStatus('offline');
+          setError('Session Expired. Reconnect to resume live updates.');
+        } else {
+          setStatus('offline');
+          setError('Worker telemetry is unavailable.');
+        }
       }
     } finally {
       if (requestRef.current === controller) {

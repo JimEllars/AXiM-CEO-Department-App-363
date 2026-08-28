@@ -7,6 +7,7 @@ export interface Env {
   RESEND_API_KEY: string;
   EMAIL_FROM: string;
   CEO_TELEMETRY_KV: KVNamespace;
+  CEO_CLIENT_SECRET: string;
 }
 
 export interface CoreEvent {

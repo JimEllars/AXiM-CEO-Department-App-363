@@ -1,3 +1,4 @@
+import { readSession } from '../routes/AppRouter';
 const workerUrl = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\/$/, '');
 const REQUEST_TIMEOUT_MS = 7000;
 
@@ -27,7 +28,11 @@ async function requestJson(url, options = {}) {
     });
 
     if (!response.ok) {
-      throw new Error(`Request failed with ${response.status}`);
+      if (response.status === 401) {
+      window.dispatchEvent(new CustomEvent('session-expired'));
+      throw new Error('Unauthorized');
+    }
+    throw new Error(`Request failed with ${response.status}`);
     }
 
     return await response.json();
@@ -44,7 +49,7 @@ export async function fetchMetrics(signal) {
   try {
     const data = await requestJson(`${workerUrl}/api/v1/metrics`, {
       signal,
-      headers: { Accept: "application/json" }
+      headers: { Accept: "application/json", ...getAuthHeaders() }
     });
     return Array.isArray(data) ? data : [];
   } catch (error) {
@@ -61,7 +66,7 @@ export async function fetchTelemetry(signal) {
   try {
     const data = await requestJson(`${workerUrl}/api/v1/telemetry?limit=25`, {
       signal,
-      headers: { Accept: 'application/json' }
+      headers: { Accept: 'application/json', ...getAuthHeaders() }
     });
     return {
       ...data,
@@ -86,4 +91,10 @@ export async function fetchWorkerHealth(signal) {
 
 export function hasWorkerConnection() {
   return Boolean(workerUrl);
+}
+
+function getAuthHeaders() {
+  const session = readSession();
+  const token = session?.token || import.meta.env.VITE_CEO_CLIENT_SECRET;
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
