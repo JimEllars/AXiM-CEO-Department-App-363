@@ -9,7 +9,7 @@
   },
   "kv_namespaces": [
     {
-      "binding": "TELEMETRY_KV",
+      "binding": "CEO_TELEMETRY_KV",
       "id": "mock_id"
     }
   ],
