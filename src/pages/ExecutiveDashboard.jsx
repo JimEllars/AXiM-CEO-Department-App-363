@@ -58,7 +58,7 @@ function ExecutiveDashboard() {
   const overview = active === 'overview';
 
   return (
-    <div className={`dashboard-shell ${collapsed ? 'nav-collapsed' : ''}`}>
+    <div className={`flex h-screen overflow-hidden bg-[#07100f] ${collapsed ? 'nav-collapsed' : ''}`}>
       <Sidebar
         active={active}
         collapsed={collapsed}
@@ -66,17 +66,17 @@ function ExecutiveDashboard() {
         onToggle={() => setCollapsed((value) => !value)}
         onLogout={logout}
       />
-      <main className="dashboard-main">
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto overflow-x-hidden p-6 md:p-8">
         <DashboardHeader
           role={session.role || 'Executive'}
           search={search}
           onSearch={setSearch}
         />
-        <div className="system-banner">
-          <span><i /> All systems operational</span>
-          <span>Contribution health <b>77.6%</b></span>
-          <span>Core API <b>84ms</b></span>
-          <span>Last sync <b>{lastSync}</b></span>
+        <div className="flex flex-wrap items-center gap-4 p-4 mt-6 bg-[rgba(102,227,164,0.05)] border border-[rgba(102,227,164,0.15)] rounded-xl text-xs font-mono text-[#66e3a4]">
+          <span className="flex items-center gap-2"><i className="w-2 h-2 rounded-full bg-[#66e3a4] shadow-[0_0_8px_rgba(102,227,164,0.6)]" /> All systems operational</span>
+          <span className="flex items-center gap-1.5 opacity-80">Contribution health <b className="text-white">77.6%</b></span>
+          <span className="flex items-center gap-1.5 opacity-80">Core API <b className="text-white">84ms</b></span>
+          <span className="flex items-center gap-1.5 opacity-80 ml-auto">Last sync <b className="text-white">{lastSync}</b></span>
         </div>
         <ConnectionStatus
           status={status}
@@ -87,7 +87,7 @@ function ExecutiveDashboard() {
         {overview ? (
           <>
             <MetricGrid />
-            <div className="dashboard-grid">
+            <div className="dashboard-grid grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
               <TelemetryPanel search={search} events={events} />
               <PhaseGates />
               <DirectiveDesk />

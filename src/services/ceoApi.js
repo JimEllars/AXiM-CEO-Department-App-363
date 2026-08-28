@@ -36,6 +36,17 @@ async function requestJson(url, options = {}) {
   }
 }
 
+export async function fetchMetrics(signal) {
+  if (!workerUrl) {
+    return [];
+  }
+
+  return requestJson(`${workerUrl}/api/v1/metrics`, {
+    signal,
+    headers: { Accept: "application/json" }
+  });
+}
+
 export async function fetchTelemetry(signal) {
   if (!workerUrl) {
     return { events: [], volatile: true, unavailable: true };

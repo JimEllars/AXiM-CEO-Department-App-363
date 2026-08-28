@@ -1,5 +1,6 @@
 import { createHitlToken, verifyHitlToken, verifySignature } from './security';
 import { addTelemetry, listTelemetry, resolveTelemetry } from './services/telemetryStore';
+import { getMetrics } from './services/metrics';
 import type { CoreEvent, Env } from './types';
 
 const DEVELOPMENT_ORIGINS = new Set([
@@ -90,7 +91,7 @@ async function handleCoreWebhook(request: Request, env: Env): Promise<Response> 
     return json({ error: 'Payload does not match the Core event contract' }, 422);
   }
 
-  const record = addTelemetry(event);
+  const record = await addTelemetry(env, event);
   const hitlToken = event.hitl_required && event.action_schema?.action_id
     ? await createHitlToken(
       event.action_schema.action_id,
@@ -117,14 +118,14 @@ async function handleCoreWebhook(request: Request, env: Env): Promise<Response> 
   }, 202);
 }
 
-async function handleTelemetry(request: Request): Promise<Response> {
+async function handleTelemetry(request: Request, env: Env): Promise<Response> {
   const limit = Number(new URL(request.url).searchParams.get('limit') || 25);
 
   return json({
-    events: listTelemetry(Number.isFinite(limit) ? limit : 25),
+    events: await listTelemetry(env, Number.isFinite(limit) ? limit : 25),
     volatile: true,
     note: 'Worker memory is temporary. Connect durable storage before production use.'
-  });
+  }, 200);
 }
 
 async function handleHitlResolve(request: Request, env: Env): Promise<Response> {
@@ -141,7 +142,7 @@ async function handleHitlResolve(request: Request, env: Env): Promise<Response> 
     return json({ error: 'Invalid HITL resolution contract' }, 422);
   }
 
-  const resolved = resolveTelemetry(action_id, resolution);
+  const resolved = await resolveTelemetry(env, action_id, resolution);
 
   console.log(JSON.stringify({
     stream: 'executive_directives',
@@ -151,7 +152,7 @@ async function handleHitlResolve(request: Request, env: Env): Promise<Response> 
     resolvedAt: new Date().toISOString()
   }));
 
-  return json({ resolved: true, action_id, resolution, tracked: resolved });
+  return json({ resolved: true, action_id, resolution, tracked: resolved }, 200);
 }
 
 async function handleApproval(request: Request, env: Env): Promise<Response> {
@@ -164,11 +165,12 @@ async function handleApproval(request: Request, env: Env): Promise<Response> {
   return json({
     valid: true,
     message: 'Approval token verified. Submit the signed HITL resolution through the executive client.'
-  });
+  }, 200);
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const startTime = Date.now();
     const url = new URL(request.url);
     const origin = request.headers.get('Origin');
     const headers = corsHeaders(origin, env);
@@ -182,20 +184,46 @@ export default {
     }
 
     let response: Response;
+    let errorRate = 0;
 
-    if (request.method === 'GET' && url.pathname === '/health') {
-      response = json({ status: 'healthy', service: 'ceo-edge-worker' });
-    } else if (request.method === 'GET' && url.pathname === '/api/v1/telemetry') {
-      response = await handleTelemetry(request);
-    } else if (request.method === 'GET' && url.pathname === '/api/v1/approve') {
-      response = await handleApproval(request, env);
-    } else if (request.method === 'POST' && url.pathname === '/api/v1/core-webhook') {
-      response = await handleCoreWebhook(request, env);
-    } else if (request.method === 'POST' && url.pathname === '/api/v1/hitl-resolve') {
-      response = await handleHitlResolve(request, env);
-    } else {
-      response = json({ error: 'Route not found' }, 404);
+    try {
+      if (request.method === 'GET' && url.pathname === '/health') {
+        response = json({ status: 'healthy', service: 'ceo-edge-worker' }, 200);
+      } else if (request.method === 'GET' && url.pathname === '/api/v1/metrics') {
+        response = json(getMetrics(), 200);
+      } else if (request.method === 'GET' && url.pathname === '/api/v1/telemetry') {
+        response = await handleTelemetry(request, env);
+      } else if (request.method === 'GET' && url.pathname === '/api/v1/approve') {
+        response = await handleApproval(request, env);
+      } else if (request.method === 'POST' && url.pathname === '/api/v1/core-webhook') {
+        response = await handleCoreWebhook(request, env);
+      } else if (request.method === 'POST' && url.pathname === '/api/v1/hitl-resolve') {
+        response = await handleHitlResolve(request, env);
+      } else {
+        response = json({ error: 'Route not found' }, 404);
+      }
+
+      if (!response.ok) {
+        errorRate = 1;
+      }
+    } catch (err) {
+      errorRate = 1;
+      response = json({ error: 'Internal Server Error' }, 500);
+      console.error(err);
     }
+
+    const latency = Date.now() - startTime;
+
+    // Cloudflare Workers Observability logging
+    console.log(JSON.stringify({
+      stream: 'observability',
+      path: url.pathname,
+      method: request.method,
+      status: response.status,
+      latency,
+      errorRate,
+      timestamp: new Date().toISOString()
+    }));
 
     const outgoing = new Response(response.body, response);
     Object.entries(headers).forEach(([key, value]) => outgoing.headers.set(key, value));
