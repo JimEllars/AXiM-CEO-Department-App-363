@@ -7,7 +7,7 @@ import PanelDetailsModal from './PanelDetailsModal';
 const { FiArrowUpRight, FiRadio } = FiIcons;
 
 function normalizeEvents(events) {
-  return events
+  return (events || [])
     .map((item) => {
       const event = item.event || item;
 

@@ -20,7 +20,7 @@ function MetricGrid() {
 
   return (
     <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {metrics.map((metric, index) => (
+      {(metrics || []).map((metric, index) => (
         <motion.article
           className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg transition-transform hover:-translate-y-1"
           key={metric.label}
