@@ -123,8 +123,8 @@ async function handleTelemetry(request: Request, env: Env): Promise<Response> {
 
   return json({
     events: await listTelemetry(env, Number.isFinite(limit) ? limit : 25),
-    volatile: true,
-    note: 'Worker memory is temporary. Connect durable storage before production use.'
+    volatile: false,
+    note: 'Telemetry is retained in the CEO_TELEMETRY_KV namespace.'
   }, 200);
 }
 

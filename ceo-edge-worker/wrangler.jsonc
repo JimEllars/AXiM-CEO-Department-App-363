@@ -2,7 +2,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ceo-edge-worker",
   "main": "src/index.ts",
-  "compatibility_date": "2025-01-29",
+  "compatibility_date": "2026-08-01",
   "workers_dev": true,
   "observability": {
     "enabled": true
@@ -10,12 +10,12 @@
   "kv_namespaces": [
     {
       "binding": "CEO_TELEMETRY_KV",
-      "id": "mock_id"
+      "id": "7cbe5e1dfc7149a1a2ebf8278e95761f"
     }
   ],
   "vars": {
-    "ENVIRONMENT": "development",
-    "CEO_APP_ORIGIN": "https://ceo.axim.us.com",
+    "ENVIRONMENT": "production",
+    "CEO_APP_ORIGIN": "https://axim-ceo-department-app-363.pages.dev",
     "EMAILIT_API_URL": "https://api.emailit.com/v1/emails",
     "EMAIL_FROM": "AXiM Executive Alerts <alerts@example.com>"
   }
