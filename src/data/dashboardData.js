@@ -1,17 +1,3 @@
-export const metrics = [
-  { label: 'Gross revenue', value: '$1.84M', change: '+12.8%', tone: 'green' },
-  { label: 'Contribution margin', value: '77.6%', change: '+2.4%', tone: 'green' },
-  { label: 'Assessments QTD', value: '18,492', change: '+18.1%', tone: 'blue' },
-  { label: 'Pending directives', value: '07', change: '3 urgent', tone: 'amber' }
-];
-
-export const telemetry = [
-  { dept: 'CFO', event: 'Contribution margin recovered above threshold', time: '2m', state: 'Healthy' },
-  { dept: 'ONYX', event: 'Desktop agent requested privileged browser action', time: '8m', state: 'Review' },
-  { dept: 'CTO', event: 'Edge latency p95 stabilized at 84ms', time: '14m', state: 'Healthy' },
-  { dept: 'COO', event: 'Partner certification batch ready for sign-off', time: '22m', state: 'Review' }
-];
-
 export const phases = [
   { name: 'Foundation', detail: 'Blueprint + Generator', state: 'Live', progress: 100 },
   { name: 'Expansion', detail: 'Playbooks + Bundles', state: 'Live', progress: 82 },
