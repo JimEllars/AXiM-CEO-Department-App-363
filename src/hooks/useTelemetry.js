@@ -8,7 +8,7 @@ export function useTelemetry() {
   const [lastUpdated, setLastUpdated] = useState(null);
   const requestRef = useRef(null);
 
-  const refresh = useCallback(async (externalSignal) => {
+  const refresh = useCallback(async (externalSignal, isBackground = false) => {
     if (!hasWorkerConnection()) {
       setStatus('demo');
       setError('');
@@ -28,11 +28,14 @@ export function useTelemetry() {
       }
     }
 
-    setStatus((current) => current === 'connected' ? current : 'connecting');
+    if (!isBackground) {
+      setStatus((current) => current === 'connected' ? current : 'connecting');
+    }
 
     try {
       const result = await fetchTelemetry(controller.signal);
-      setEvents(Array.isArray(result.events) ? result.events : []);
+      const newEvents = Array.isArray(result.events) ? result.events : [];
+      setEvents((prev) => JSON.stringify(prev) !== JSON.stringify(newEvents) ? newEvents : prev);
       setStatus('connected');
       setError('');
       setLastUpdated(new Date());
@@ -57,7 +60,7 @@ export function useTelemetry() {
     const controller = new AbortController();
 
     refresh(controller.signal);
-    const timer = window.setInterval(() => refresh(), 15000);
+    const timer = window.setInterval(() => refresh(undefined, true), 45000);
 
     return () => {
       controller.abort();

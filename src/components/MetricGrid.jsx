@@ -1,29 +1,55 @@
-import React from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { fetchMetrics } from '../services/ceoApi';
-import { useState, useEffect } from 'react';
 
 const { FiArrowUpRight } = FiIcons;
 
 function MetricGrid() {
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
+  const requestRef = useRef(null);
+
+  const fetchLatestMetrics = useCallback(async (isBackground = false) => {
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
+
+    if (!isBackground) {
+      setLoading(true);
+    }
+
+    try {
+      const data = await fetchMetrics(controller.signal);
+
+      // Update state only if new data differs
+      setMetrics((prev) => JSON.stringify(prev) !== JSON.stringify(data) ? data : prev);
+      setLoading(false);
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Failed to fetch metrics', err);
+        // On error, keep existing data if available, but stop loading
+        setLoading(false);
+      }
+    } finally {
+      if (requestRef.current === controller) {
+        requestRef.current = null;
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    const controller = new AbortController();
-    fetchMetrics(controller.signal)
-      .then(data => {
-        setMetrics(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        if (err.name !== 'AbortError') console.error('Failed to fetch metrics', err);
-        setLoading(false);
-      });
-    return () => controller.abort();
-  }, []);
+    fetchLatestMetrics();
+
+    // Silent background polling every 45s
+    const timer = window.setInterval(() => fetchLatestMetrics(true), 45000);
+
+    return () => {
+      requestRef.current?.abort();
+      window.clearInterval(timer);
+    };
+  }, [fetchLatestMetrics]);
 
   if (loading) {
     return (
@@ -55,12 +81,32 @@ function MetricGrid() {
     );
   }
 
+  // Graceful fallback for empty dataset
+  if (!metrics || metrics.length === 0) {
+    return (
+      <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg h-[178px]"
+          >
+            <div className="metric-top flex justify-between items-center mb-3 text-sm text-[#84958e] font-semibold tracking-wider uppercase">
+              <span>---</span>
+              <span className="metric-change px-2 py-1 rounded text-xs font-bold bg-[rgba(199,224,213,0.1)] text-[#84958e]">---</span>
+            </div>
+            <strong className="block text-3xl font-bold tracking-tight text-[#e8efeb] mb-4">---</strong>
+          </div>
+        ))}
+      </section>
+    );
+  }
+
   return (
     <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {(metrics || []).map((metric, index) => (
+      {metrics.map((metric, index) => (
         <motion.article
           className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg transition-transform hover:-translate-y-1 h-[178px]"
-          key={metric.label}
+          key={metric.label || index}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: index * 0.06 }}
