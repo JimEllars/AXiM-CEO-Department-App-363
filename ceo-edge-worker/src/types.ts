@@ -8,6 +8,7 @@ export interface Env {
   EMAIL_FROM: string;
   CEO_TELEMETRY_KV: KVNamespace;
   CEO_CLIENT_SECRET: string;
+  SELLDONE_WEBHOOK_SECRET: string;
 }
 
 export interface CoreEvent {

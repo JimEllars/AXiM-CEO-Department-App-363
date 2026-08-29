@@ -170,6 +170,43 @@ async function handleApproval(request: Request, env: Env): Promise<Response> {
 
 
 
+
+async function handleSelldoneWebhook(request: Request, env: Env): Promise<Response> {
+  const signature = request.headers.get('X-Selldone-Signature');
+  if (!signature) {
+    return json({ error: 'Unauthorized: Missing signature' }, 401);
+  }
+
+  const rawBody = await request.text();
+  const valid = await verifySignature(rawBody, signature, env.SELLDONE_WEBHOOK_SECRET);
+
+  if (!valid) {
+    return json({ error: 'Unauthorized: Invalid webhook signature' }, 401);
+  }
+
+  let payload: any;
+  try {
+    payload = JSON.parse(rawBody);
+  } catch {
+    return json({ error: 'Invalid JSON payload' }, 400);
+  }
+
+  // Extract financial telemetry and drop PII
+  const { order_id, total_amount, affiliate_code, ...rest } = payload;
+
+  const safeTelemetry = {
+    stream: 'selldone_telemetry',
+    order_id,
+    total_amount,
+    affiliate_code,
+    receivedAt: new Date().toISOString()
+  };
+
+  console.log(JSON.stringify(safeTelemetry));
+
+  return json({ accepted: true }, 202);
+}
+
 function verifyClientAuth(request: Request, env: Env): boolean {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -247,6 +284,8 @@ export default {
         }
       } else if (request.method === 'GET' && url.pathname === '/api/v1/approve') {
         response = await handleApproval(request, env);
+      } else if (request.method === 'POST' && url.pathname === '/api/v1/selldone-webhook') {
+        response = await handleSelldoneWebhook(request, env);
       } else if (request.method === 'POST' && url.pathname === '/api/v1/core-webhook') {
         response = await handleCoreWebhook(request, env);
       } else if (request.method === 'POST' && url.pathname === '/api/v1/hitl-resolve') {
