@@ -1,8 +1,8 @@
 export function getMetrics() {
   return [
-    { label: 'Gross revenue', value: '$1.84M', change: '+12.8%', tone: 'green' },
-    { label: 'Contribution margin', value: '77.6%', change: '+2.4%', tone: 'green' },
-    { label: 'Assessments QTD', value: '18,492', change: '+18.1%', tone: 'blue' },
-    { label: 'Pending directives', value: '07', change: '3 urgent', tone: 'amber' }
+    { label: 'Gross Revenue', value: '$81,155', change: 'Target', tone: 'green' },
+    { label: 'Contribution Margin', value: '77.6%', change: '+2.4%', tone: 'green' },
+    { label: 'QTD Assessments', value: '1,800', change: 'Q1 Baseline', tone: 'blue' },
+    { label: 'Affiliate Yield', value: '$5,035', change: 'Projected Payouts', tone: 'amber' }
   ];
 }

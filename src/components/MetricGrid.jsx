@@ -9,20 +9,57 @@ const { FiArrowUpRight } = FiIcons;
 
 function MetricGrid() {
   const [metrics, setMetrics] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchMetrics(controller.signal).then(setMetrics).catch(err => {
-      if (err.name !== 'AbortError') console.error('Failed to fetch metrics', err);
-    });
+    fetchMetrics(controller.signal)
+      .then(data => {
+        setMetrics(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        if (err.name !== 'AbortError') console.error('Failed to fetch metrics', err);
+        setLoading(false);
+      });
     return () => controller.abort();
   }, []);
+
+  if (loading) {
+    return (
+      <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {[1, 2, 3, 4].map((i) => (
+          <div
+            key={i}
+            className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg animate-pulse h-[178px]"
+          >
+            <div className="flex justify-between items-center mb-4">
+              <div className="h-4 bg-[#84958e]/20 rounded w-1/2"></div>
+              <div className="h-4 bg-[#84958e]/20 rounded w-1/4"></div>
+            </div>
+            <div className="h-8 bg-[#e8efeb]/20 rounded w-1/3 mb-4"></div>
+            <div className="flex items-end h-10 gap-1 opacity-50">
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[30%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[50%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[40%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[60%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[55%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[75%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[70%]"></div>
+              <div className="w-full bg-[#66e3a4]/20 rounded-t-sm h-[85%]"></div>
+            </div>
+            <div className="h-3 bg-[#84958e]/20 rounded w-1/2 mt-4"></div>
+          </div>
+        ))}
+      </section>
+    );
+  }
 
   return (
     <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {(metrics || []).map((metric, index) => (
         <motion.article
-          className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg transition-transform hover:-translate-y-1"
+          className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg transition-transform hover:-translate-y-1 h-[178px]"
           key={metric.label}
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
