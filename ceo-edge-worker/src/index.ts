@@ -176,17 +176,19 @@ async function handleApproval(request: Request, env: Env): Promise<Response> {
 async function handleVoiceFeed(request: Request, env: Env): Promise<Response> {
   const mockFeed = [
     {
+      call_id: 'call_12345',
       caller_id: '+1 (555) 019-2834',
-      status: 'completed',
+      status: 'COMPLETED',
       duration: 142,
-      transcript_summary: 'Client inquiring about Q3 enterprise pricing tiers.',
+      noota_transcript_summary: 'Client inquiring about Q3 enterprise pricing tiers.',
       audio_url: 'https://example.com/audio1.mp3'
     },
     {
+      call_id: 'call_67890',
       caller_id: 'Internal: Onyx Team',
-      status: 'voicemail',
+      status: 'MISSED',
       duration: 45,
-      transcript_summary: 'Onyx node 3 requires manual override for dependency update.',
+      noota_transcript_summary: 'Onyx node 3 requires manual override for dependency update.',
       audio_url: 'https://example.com/audio2.mp3'
     }
   ];

@@ -149,3 +149,20 @@ export async function dispatchMemo(payload) {
     body: JSON.stringify(payload)
   });
 }
+
+export async function fetchVoiceFeed(signal) {
+  if (!workerUrl) {
+    return { feed: [] };
+  }
+
+  try {
+    const data = await requestJson(`${workerUrl}/api/v1/communications/voice-feed`, {
+      signal,
+      headers: { Accept: 'application/json', ...getAuthHeaders() }
+    });
+    return data;
+  } catch (error) {
+    if (error.name !== 'AbortError') console.error('fetchVoiceFeed error:', error);
+    return { feed: [] };
+  }
+}
