@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ConnectionStatus from '../components/ConnectionStatus';
 import DashboardHeader from '../components/DashboardHeader';
 import DirectiveDesk from '../components/DirectiveDesk';
+import ExecutiveCommsHub from '../components/ExecutiveCommsHub';
 import MetricGrid from '../components/MetricGrid';
 import OperationsView from '../components/OperationsView';
 import PhaseGates from '../components/PhaseGates';
@@ -87,6 +88,7 @@ function ExecutiveDashboard() {
         {overview ? (
           <>
             <MetricGrid />
+            <ExecutiveCommsHub />
             <div className="dashboard-grid grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-6">
               <TelemetryPanel search={search} events={events} />
               <PhaseGates />

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+const fs = require('fs');
+const code = `import React, { useEffect, useRef, useState } from 'react';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { directives as initialDirectives } from '../data/dashboardData';
@@ -43,7 +44,7 @@ function DirectiveDesk() {
     try {
       await resolveDirective(title, resolution);
       setDirectives((items) => items.filter((item) => item.title !== title));
-      setNotification({ type: 'success', text: `Successfully processed: ${resolution}` });
+      setNotification({ type: 'success', text: \`Successfully processed: \${resolution}\` });
       if (context?.title === title) setContext(null);
     } catch (error) {
       setNotification({ type: 'error', text: error.message || 'Failed to process action.' });
@@ -59,13 +60,13 @@ function DirectiveDesk() {
 
     setDispatchStatus('IN_PROGRESS');
     try {
-      const url = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\/$/, '') || '';
+      const url = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\\/$/, '') || '';
       const session = readSession();
-      const res = await fetch(`${url}/api/v1/directives/dispatch`, {
+      const res = await fetch(\`\${url}/api/v1/directives/dispatch\`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.token || ''}`
+          'Authorization': \`Bearer \${session?.token || ''}\`
         },
         body: JSON.stringify({
           directive_body: customDirective,
@@ -101,7 +102,7 @@ function DirectiveDesk() {
       </div>
 
       {notification && (
-        <div className={`notification-banner ${notification.type}`} style={{ padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: notification.type === 'error' ? '#fee2e2' : '#dcfce7', color: notification.type === 'error' ? '#991b1b' : '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+        <div className={\`notification-banner \${notification.type}\`} style={{ padding: '0.5rem 1rem', marginBottom: '1rem', borderRadius: '4px', backgroundColor: notification.type === 'error' ? '#fee2e2' : '#dcfce7', color: notification.type === 'error' ? '#991b1b' : '#166534', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
           <SafeIcon icon={notification.type === 'error' ? FiAlertCircle : FiCheck} />
           {notification.text}
         </div>
@@ -146,7 +147,7 @@ function DirectiveDesk() {
         {directives.map((item) => (
           <article key={item.title}>
             <div className="directive-main">
-              <span className={`priority-dot ${item.priority.toLowerCase()}`} />
+              <span className={\`priority-dot \${item.priority.toLowerCase()}\`} />
               <div>
                 <b>{item.title}</b>
                 <small>{item.source} · {item.priority} priority</small>
@@ -232,3 +233,5 @@ function DirectiveDesk() {
 }
 
 export default DirectiveDesk;
+`;
+fs.writeFileSync('src/components/DirectiveDesk.jsx', code, 'utf8');

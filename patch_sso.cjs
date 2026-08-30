@@ -1,4 +1,5 @@
-import React from 'react';
+const fs = require('fs');
+let routerCode = `import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AccessGateway from '../pages/AccessGateway';
 import ExecutiveDashboard from '../pages/ExecutiveDashboard';
@@ -25,7 +26,7 @@ function ProtectedRoleRoute({ children }) {
   const session = readSession();
 
   if (!session) {
-    window.location.href = `https://passport.axim.us.com?redirect=${encodeURIComponent(window.location.origin + '/auth/callback')}`;
+    window.location.href = \`https://passport.axim.us.com?redirect=\${encodeURIComponent(window.location.origin + '/auth/callback')}\`;
     return null;
   }
 
@@ -57,3 +58,15 @@ function AppRouter() {
 
 export { SESSION_KEY, readSession };
 export default AppRouter;
+`;
+fs.writeFileSync('src/routes/AppRouter.jsx', routerCode, 'utf8');
+
+let accessGatewayCode = fs.readFileSync('src/pages/AccessGateway.jsx', 'utf8');
+accessGatewayCode = accessGatewayCode.replace(
+    "const enterDemo = (event) => {\n    event.preventDefault();\n    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role, demo: true }));\n    navigate('/app');\n  };",
+    `const enterDemo = (event) => {
+    event.preventDefault();
+    window.location.href = \`https://passport.axim.us.com?redirect=\${encodeURIComponent(window.location.origin + '/auth/callback')}\`;
+  };`
+);
+fs.writeFileSync('src/pages/AccessGateway.jsx', accessGatewayCode, 'utf8');

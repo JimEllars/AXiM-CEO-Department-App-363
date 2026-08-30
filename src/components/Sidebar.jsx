@@ -1,5 +1,6 @@
 import React from 'react';
 import * as FiIcons from 'react-icons/fi';
+import { FiPhoneCall } from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 
 const {
@@ -11,7 +12,8 @@ const navigation = [
   { id: 'overview', label: 'Executive overview', icon: FiGrid },
   { id: 'growth', label: 'Business development', icon: FiBriefcase },
   { id: 'marketing', label: 'Marketing clusters', icon: FiTarget },
-  { id: 'onyx', label: 'Onyx AI oversight', icon: FiRadio }
+  { id: 'onyx', label: 'Onyx AI oversight', icon: FiRadio },
+  { id: 'comms', label: 'Comms Hub', icon: FiPhoneCall }
 ];
 
 function Sidebar({ active, collapsed, onNavigate, onToggle, onLogout }) {

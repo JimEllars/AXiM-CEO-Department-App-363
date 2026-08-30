@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import PanelDetailsModal from './PanelDetailsModal';
+import { useRealtimeTelemetry } from '../hooks/useRealtime';
 
 const { FiArrowUpRight, FiCheckCircle, FiClock, FiRadio } = FiIcons;
 
 function DepartmentPanel({ title, kicker, rows, kind }) {
+  const metrics = useRealtimeTelemetry();
   const [selected, setSelected] = useState(null);
   const icon = kind === 'onyx' ? FiRadio : kind === 'marketing' ? FiClock : FiCheckCircle;
 

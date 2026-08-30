@@ -1,4 +1,51 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+const fs = require('fs');
+
+// Patch OperationsView.jsx
+let opFile = 'src/components/OperationsView.jsx';
+let opCode = fs.readFileSync(opFile, 'utf8');
+if (!opCode.includes("comms:")) {
+    opCode = opCode.replace(
+        "import DepartmentPanel from './DepartmentPanel';",
+        "import DepartmentPanel from './DepartmentPanel';\nimport ExecutiveCommsHub from './ExecutiveCommsHub';"
+    );
+    opCode = opCode.replace(
+        "const config = viewConfig[view] || viewConfig.growth;",
+        `if (view === 'comms') {
+    return (
+      <div className="operations-view">
+        <div className="view-intro">
+          <span className="eyebrow">Executive Workspace</span>
+          <h2>Communications Hub</h2>
+          <p>Monitor live voice feeds and dispatch directives.</p>
+        </div>
+        <ExecutiveCommsHub />
+      </div>
+    );
+  }
+
+  const config = viewConfig[view] || viewConfig.growth;`
+    );
+    fs.writeFileSync(opFile, opCode, 'utf8');
+}
+
+// Patch Sidebar.jsx
+let sbFile = 'src/components/Sidebar.jsx';
+let sbCode = fs.readFileSync(sbFile, 'utf8');
+if (!sbCode.includes("id: 'comms'")) {
+    sbCode = sbCode.replace(
+        "import * as FiIcons from 'react-icons/fi';",
+        "import * as FiIcons from 'react-icons/fi';\nimport { FiPhoneCall } from 'react-icons/fi';"
+    );
+    sbCode = sbCode.replace(
+        "{ id: 'onyx', label: 'Onyx AI oversight', icon: FiRadio }",
+        "{ id: 'onyx', label: 'Onyx AI oversight', icon: FiRadio },\n  { id: 'comms', label: 'Comms Hub', icon: FiPhoneCall }"
+    );
+    fs.writeFileSync(sbFile, sbCode, 'utf8');
+}
+
+// Patch MetricGrid.jsx
+let mgFile = 'src/components/MetricGrid.jsx';
+let mgCode = `import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
@@ -119,12 +166,12 @@ function MetricGrid() {
           >
             <div className="metric-top flex justify-between items-center mb-3 text-sm text-[#84958e] font-semibold tracking-wider uppercase">
               <span>{metric.label}</span>
-              <span className={`metric-change px-2 py-1 rounded text-xs font-bold ${metric.tone === "green" ? "bg-[rgba(102,227,164,0.1)] text-[#66e3a4]" : metric.tone === "blue" ? "bg-[rgba(117,185,255,0.1)] text-[#75b9ff]" : "bg-[rgba(242,185,107,0.1)] text-[#f2b96b]"}`}>{metric.change}</span>
+              <span className={\`metric-change px-2 py-1 rounded text-xs font-bold \${metric.tone === "green" ? "bg-[rgba(102,227,164,0.1)] text-[#66e3a4]" : metric.tone === "blue" ? "bg-[rgba(117,185,255,0.1)] text-[#75b9ff]" : "bg-[rgba(242,185,107,0.1)] text-[#f2b96b]"}\`}>{metric.change}</span>
             </div>
             <strong className="block text-3xl font-bold tracking-tight text-[#e8efeb] mb-4">{displayValue}</strong>
             <div className="spark-bars flex items-end h-10 gap-1 opacity-50">
               {[32, 48, 39, 61, 54, 73, 68, 86].map((height, item) => (
-                <i key={item} className="w-full bg-[#66e3a4] rounded-t-sm" style={{ height: `${height}%` }} />
+                <i key={item} className="w-full bg-[#66e3a4] rounded-t-sm" style={{ height: \`\${height}%\` }} />
               ))}
             </div>
             <small className="block mt-4 text-xs text-[#84958e] flex items-center gap-1"><SafeIcon icon={FiArrowUpRight} className="text-[#66e3a4]"/> Versus previous period</small>
@@ -136,3 +183,5 @@ function MetricGrid() {
 }
 
 export default MetricGrid;
+`;
+fs.writeFileSync(mgFile, mgCode, 'utf8');
