@@ -4,7 +4,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
 export default [
-  { ignores: ['dist', 'ceo-edge-worker/.wrangler/**'] },
+  { ignores: ['ceo-edge-worker/dist/**', 'dist', 'ceo-edge-worker/.wrangler/**'] },
   js.configs.recommended,
   {
     files: ['**/*.{js,jsx}'],

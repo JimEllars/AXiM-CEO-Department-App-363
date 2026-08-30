@@ -108,10 +108,12 @@ function MetricGrid() {
     <section className="metric-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       {metrics.map((metric, index) => {
         let displayValue = metric.value;
+        let isEmerald = true;
         if (metric.label.toLowerCase().includes('revenue')) {
            displayValue = '$' + (realtimeMetrics.grossRevenue || parseInt(metric.value.replace(/[^0-9]/g, '')) || 0).toLocaleString();
         } else if (metric.label.toLowerCase().includes('margin')) {
            displayValue = realtimeMetrics.contributionMargin + '%';
+           isEmerald = realtimeMetrics.contributionMargin >= 77.6;
         } else if (metric.label.toLowerCase().includes('agent')) {
            displayValue = realtimeMetrics.activeAgents.toString();
         }
@@ -128,7 +130,7 @@ function MetricGrid() {
               <span>{metric.label}</span>
               <span className={`metric-change px-2 py-1 rounded text-xs font-bold ${metric.tone === "green" ? "bg-[rgba(102,227,164,0.1)] text-[#66e3a4]" : metric.tone === "blue" ? "bg-[rgba(117,185,255,0.1)] text-[#75b9ff]" : "bg-[rgba(242,185,107,0.1)] text-[#f2b96b]"}`}>{metric.change}</span>
             </div>
-            <strong className="block text-3xl font-bold tracking-tight text-[#e8efeb] mb-4">{displayValue}</strong>
+            <strong className={`block text-3xl font-bold tracking-tight mb-4 ${metric.label.toLowerCase().includes('margin') ? (isEmerald ? 'text-[#66e3a4]' : 'text-rose-400') : 'text-[#e8efeb]'}`}>{displayValue}</strong>
             <div className="spark-bars flex items-end h-10 gap-1 opacity-50">
               {[32, 48, 39, 61, 54, 73, 68, 86].map((height, item) => (
                 <i key={item} className="w-full bg-[#66e3a4] rounded-t-sm" style={{ height: `${height}%` }} />
