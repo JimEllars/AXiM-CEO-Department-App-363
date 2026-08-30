@@ -118,6 +118,23 @@ function getAuthHeaders() {
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+
+export async function submitGateDecision(payload) {
+  if (!workerUrl) {
+    throw new Error('Worker URL not configured');
+  }
+
+  return requestJson(`${workerUrl}/api/v1/governance/gate-decision`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export async function dispatchDirective(payload) {
   if (!workerUrl) {
     throw new Error('Worker URL not configured');
