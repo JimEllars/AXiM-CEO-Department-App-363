@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { readSession } from '../routes/AppRouter';
+import { dispatchMemo } from '../services/ceoApi';
 
 const { FiPhone, FiMic, FiMail, FiSend, FiAlertCircle, FiCheckCircle } = FiIcons;
 
@@ -38,17 +39,8 @@ function ExecutiveCommsHub() {
     e.preventDefault();
     setDispatchStatus('dispatching');
     try {
-      const url = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\/$/, '') || '';
-      const session = readSession();
-      const res = await fetch(`${url}/api/v1/communications/dispatch-memo`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.token || ''}`
-        },
-        body: JSON.stringify(memo)
-      });
-      if (res.ok) {
+      const data = await dispatchMemo(memo);
+      if (data && data.success) {
         setDispatchStatus('success');
         setMemo({ subject: '', priority: 'Medium', recipients: '', body: '' });
       } else {

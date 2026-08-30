@@ -117,3 +117,35 @@ function getAuthHeaders() {
   const token = session?.token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
+
+export async function dispatchDirective(payload) {
+  if (!workerUrl) {
+    throw new Error('Worker URL not configured');
+  }
+
+  return requestJson(`${workerUrl}/api/v1/directives/dispatch`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function dispatchMemo(payload) {
+  if (!workerUrl) {
+    throw new Error('Worker URL not configured');
+  }
+
+  return requestJson(`${workerUrl}/api/v1/communications/dispatch-memo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      ...getAuthHeaders()
+    },
+    body: JSON.stringify(payload)
+  });
+}

@@ -3,7 +3,7 @@ import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { directives as initialDirectives } from '../data/dashboardData';
 import { readPersistedState, writePersistedState } from '../utils/persistedState';
-import { resolveDirective } from '../services/ceoApi';
+import { resolveDirective, dispatchDirective } from '../services/ceoApi';
 import { readSession } from '../routes/AppRouter';
 
 const { FiCheck, FiClock, FiMessageSquare, FiX, FiInfo, FiAlertCircle, FiSend } = FiIcons;
@@ -59,22 +59,17 @@ function DirectiveDesk() {
 
     setDispatchStatus('IN_PROGRESS');
     try {
-      const url = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\/$/, '') || '';
-      const session = readSession();
-      const res = await fetch(`${url}/api/v1/directives/dispatch`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session?.token || ''}`
-        },
-        body: JSON.stringify({
-          directive_body: customDirective,
-          target: 'onyx'
-        })
-      });
+      const payload = {
+        directive_id: `dir_${Math.random().toString(36).substring(7)}`,
+        target_swarm: 'onyx',
+        action_payload: { command: customDirective },
+        priority: 'CRITICAL'
+      };
 
-      if (res.ok) {
-        setDispatchStatus('COMPLETED');
+      const data = await dispatchDirective(payload);
+
+      if (data && data.success) {
+        setDispatchStatus('DISPATCHED');
         setCustomDirective('');
       } else {
         setDispatchStatus('FAILED');
@@ -84,9 +79,10 @@ function DirectiveDesk() {
     }
 
     setTimeout(() => {
-        if (dispatchStatus !== 'FAILED' && dispatchStatus !== 'IN_PROGRESS') {
-             setDispatchStatus(null);
-        }
+        setDispatchStatus(current => {
+          if (current !== 'FAILED' && current !== 'IN_PROGRESS') return null;
+          return current;
+        });
     }, 3000);
   };
 
@@ -129,8 +125,8 @@ function DirectiveDesk() {
          </form>
          {dispatchStatus && (
             <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '4px',
-              backgroundColor: dispatchStatus === 'COMPLETED' ? 'rgba(102, 227, 164, 0.2)' : dispatchStatus === 'IN_PROGRESS' ? 'rgba(117, 185, 255, 0.2)' : 'rgba(239, 68, 68, 0.2)',
-              color: dispatchStatus === 'COMPLETED' ? '#66e3a4' : dispatchStatus === 'IN_PROGRESS' ? '#75b9ff' : '#ef4444'
+              backgroundColor: dispatchStatus === 'DISPATCHED' ? 'rgba(102, 227, 164, 0.2)' : dispatchStatus === 'IN_PROGRESS' ? 'rgba(117, 185, 255, 0.2)' : 'rgba(239, 68, 68, 0.2)',
+              color: dispatchStatus === 'DISPATCHED' ? '#66e3a4' : dispatchStatus === 'IN_PROGRESS' ? '#75b9ff' : '#ef4444'
              }}>
                Status: {dispatchStatus}
             </div>
