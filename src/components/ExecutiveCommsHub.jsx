@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
-import { readSession } from '../routes/AppRouter';
-import { dispatchMemo } from '../services/ceoApi';
+import { dispatchMemo, fetchVoiceFeed } from '../services/ceoApi';
 
 const { FiPhone, FiMic, FiMail, FiSend, FiAlertCircle, FiCheckCircle } = FiIcons;
 
@@ -12,27 +11,26 @@ function ExecutiveCommsHub() {
   const [dispatchStatus, setDispatchStatus] = useState(null);
 
   useEffect(() => {
-    const fetchVoice = async () => {
+    const loadVoiceFeed = async (signal) => {
       try {
-        const url = import.meta.env.VITE_CEO_WORKER_URL?.replace(/\/$/, '') || '';
-        const session = readSession();
-        const res = await fetch(`${url}/api/v1/communications/voice-feed`, {
-          headers: {
-            'Authorization': `Bearer ${session?.token || ''}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setVoiceFeed(data.feed || []);
-        }
+        const data = await fetchVoiceFeed(signal);
+        setVoiceFeed(data.feed || []);
       } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch voice feed', err);
+        // Ignored, handled by api service
       }
     };
-    fetchVoice();
-    const interval = setInterval(fetchVoice, 15000);
-    return () => clearInterval(interval);
+
+    const controller = new AbortController();
+    loadVoiceFeed(controller.signal);
+
+    const interval = setInterval(() => {
+      loadVoiceFeed(controller.signal);
+    }, 15000);
+
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, []);
 
   const handleDispatch = async (e) => {
@@ -73,9 +71,9 @@ function ExecutiveCommsHub() {
                   <span className="text-xs uppercase bg-[#07100f] px-2 py-1 rounded">{call.status}</span>
                 </div>
                 <div className="text-sm mb-2 opacity-80">Duration: {call.duration}s</div>
-                {call.transcript_summary && (
+                {call.noota_transcript_summary && (
                   <p className="text-sm bg-black/30 p-2 rounded italic">
-                    "{call.transcript_summary}"
+                    "{call.noota_transcript_summary}"
                   </p>
                 )}
                 {call.audio_url && (

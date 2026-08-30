@@ -28,9 +28,7 @@ function MetricGrid() {
       setLoading(false);
     } catch (err) {
       if (err.name !== 'AbortError') {
-        // eslint-disable-next-line no-console
-        console.error('Failed to fetch metrics', err);
-        setLoading(false);
+                setLoading(false);
       }
     } finally {
       if (requestRef.current === controller) {
