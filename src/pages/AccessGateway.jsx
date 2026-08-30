@@ -15,8 +15,7 @@ function AccessGateway() {
 
   const enterDemo = (event) => {
     event.preventDefault();
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role, demo: true }));
-    navigate('/app');
+    window.location.href = `https://passport.axim.us.com?redirect=${encodeURIComponent(window.location.origin + '/auth/callback')}`;
   };
 
   return (

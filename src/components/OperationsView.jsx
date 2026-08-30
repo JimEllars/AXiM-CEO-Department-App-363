@@ -1,5 +1,6 @@
 import React from 'react';
 import DepartmentPanel from './DepartmentPanel';
+import ExecutiveCommsHub from './ExecutiveCommsHub';
 import { growthRows, marketingRows, onyxRows } from '../data/dashboardData';
 
 const viewConfig = {
@@ -9,6 +10,19 @@ const viewConfig = {
 };
 
 function OperationsView({ view }) {
+  if (view === 'comms') {
+    return (
+      <div className="operations-view">
+        <div className="view-intro">
+          <span className="eyebrow">Executive Workspace</span>
+          <h2>Communications Hub</h2>
+          <p>Monitor live voice feeds and dispatch directives.</p>
+        </div>
+        <ExecutiveCommsHub />
+      </div>
+    );
+  }
+
   const config = viewConfig[view] || viewConfig.growth;
 
   return (
