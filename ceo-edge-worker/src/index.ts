@@ -232,6 +232,43 @@ async function handleDispatchDirective(request: Request, env: Env): Promise<Resp
   }, 200);
 }
 
+
+async function handleGateDecision(request: Request, env: Env): Promise<Response> {
+  let payload: any;
+  try {
+    payload = await request.json();
+  } catch {
+    return json({ error: 'Invalid JSON payload' }, 400);
+  }
+
+  const { gate_id, decision, notes } = payload;
+  if (typeof gate_id !== 'string') {
+    return json({ error: 'Invalid or missing gate_id' }, 400);
+  }
+
+  if (!['APPROVE', 'REJECT', 'HOLD'].includes(decision)) {
+    return json({ error: 'Invalid or missing decision' }, 400);
+  }
+
+  console.log(JSON.stringify({
+    stream: 'governance_gate_decision',
+    gate_id,
+    decision,
+    notes,
+    timestamp: new Date().toISOString()
+  }));
+
+  // Simulate Core acknowledgement
+  await new Promise(r => setTimeout(r, 600));
+
+  return json({
+    success: true,
+    status: 'ACKNOWLEDGED',
+    gate_id,
+    decision
+  }, 200);
+}
+
 async function handleDispatchMemo(request: Request, env: Env): Promise<Response> {
   let payload: any;
   try {
@@ -399,6 +436,12 @@ export default {
           response = json({ error: 'Unauthorized' }, 401);
         } else {
           response = await handleDispatchMemo(request, env);
+        }
+      } else if (request.method === 'POST' && url.pathname === '/api/v1/governance/gate-decision') {
+        if (!verifyClientAuth(request, env)) {
+          response = json({ error: 'Unauthorized' }, 401);
+        } else {
+          response = await handleGateDecision(request, env);
         }
       } else if (request.method === 'POST' && url.pathname === '/api/v1/directives/dispatch') {
         if (!verifyClientAuth(request, env)) {
