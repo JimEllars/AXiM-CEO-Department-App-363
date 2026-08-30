@@ -10,6 +10,7 @@ import PhaseGates from '../components/PhaseGates';
 import Sidebar from '../components/Sidebar';
 import TelemetryPanel from '../components/TelemetryPanel';
 import { useTelemetry } from '../hooks/useTelemetry';
+import { useRealtimeTelemetry } from '../hooks/useRealtime';
 import { readSession, SESSION_KEY } from '../routes/AppRouter';
 
 function ExecutiveDashboard() {
@@ -20,6 +21,7 @@ function ExecutiveDashboard() {
   const navigate = useNavigate();
   const session = useMemo(() => readSession() || {}, []);
   const { events, status, error, lastUpdated, refresh } = useTelemetry();
+  const { metrics } = useRealtimeTelemetry();
 
   useEffect(() => {
     const timer = window.setInterval(() => setLastSync('Just now'), 30000);
@@ -75,8 +77,8 @@ function ExecutiveDashboard() {
         />
         <div className="flex flex-wrap items-center gap-4 p-4 mt-6 bg-[rgba(102,227,164,0.05)] border border-[rgba(102,227,164,0.15)] rounded-xl text-xs font-mono text-[#66e3a4]">
           <span className="flex items-center gap-2"><i className="w-2 h-2 rounded-full bg-[#66e3a4] shadow-[0_0_8px_rgba(102,227,164,0.6)]" /> All systems operational</span>
-          <span className="flex items-center gap-1.5 opacity-80">Contribution health <b className="text-white">77.6%</b></span>
-          <span className="flex items-center gap-1.5 opacity-80">Core API <b className="text-white">84ms</b></span>
+          <span className="flex items-center gap-1.5 opacity-80">Contribution health <b className="text-white">{metrics?.contributionMargin ?? 77.6}%</b></span>
+          <span className="flex items-center gap-1.5 opacity-80">Core API <b className="text-white">{metrics?.edgeLatency ?? 84}ms</b></span>
           <span className="flex items-center gap-1.5 opacity-80 ml-auto">Last sync <b className="text-white">{lastSync}</b></span>
         </div>
         <ConnectionStatus

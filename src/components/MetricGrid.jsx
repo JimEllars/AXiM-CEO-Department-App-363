@@ -8,12 +8,21 @@ import { fetchMetrics } from '../services/ceoApi';
 const { FiArrowUpRight } = FiIcons;
 
 function MetricGrid() {
-  const realtimeMetrics = useRealtimeTelemetry();
+  const { metrics: realtimeMetrics, isConnected } = useRealtimeTelemetry();
   const [metrics, setMetrics] = useState([]);
   const [loading, setLoading] = useState(true);
   const requestRef = useRef(null);
+  const isConnectedRef = useRef(isConnected);
+
+  useEffect(() => {
+    isConnectedRef.current = isConnected;
+  }, [isConnected]);
 
   const fetchLatestMetrics = useCallback(async (isBackground = false) => {
+    if (isBackground && isConnectedRef.current) {
+        return; // Skip background polling if websocket is connected
+    }
+
     requestRef.current?.abort();
     const controller = new AbortController();
     requestRef.current = controller;
@@ -28,7 +37,7 @@ function MetricGrid() {
       setLoading(false);
     } catch (err) {
       if (err.name !== 'AbortError') {
-                setLoading(false);
+        setLoading(false);
       }
     } finally {
       if (requestRef.current === controller) {
