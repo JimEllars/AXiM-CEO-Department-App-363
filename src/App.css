@@ -199,6 +199,10 @@
 
 .department-panel {
   max-width: 1000px;
+  backdrop-filter: blur(12px);
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid #1e293b;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
 .department-table {
@@ -322,9 +326,10 @@
   position: relative;
   width: min(460px, 100%);
   padding: 30px;
-  border: 1px solid var(--line);
+  border: 1px solid #1e293b;
   border-radius: 16px;
-  background: #10201c;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
   box-shadow: 0 30px 80px rgba(0, 0, 0, .45);
 }
 
@@ -378,4 +383,28 @@
   .notification-popover {
     right: -55px;
   }
+}
+.approve-button {
+  padding: 8px 12px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #fbbf24;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.approve-button:hover:not(:disabled) {
+  background-color: rgba(245, 158, 11, 0.2);
+}
+
+.panel {
+  backdrop-filter: blur(12px);
+  background-color: rgba(15, 23, 42, 0.85);
+  border: 1px solid #1e293b;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }

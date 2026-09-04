@@ -132,7 +132,7 @@ function DepartmentPanel({ title, kicker, rows: initialRows, kind }) {
 
   return (
     <>
-      <section className="panel department-panel bg-[#101e1b] border border-[rgba(199,224,213,0.11)] rounded-2xl shadow-xl overflow-hidden">
+      <section className="panel department-panel backdrop-blur-md bg-slate-900/85 border border-slate-800 rounded-2xl shadow-xl shadow-black/40 overflow-hidden">
         <div className="panel-heading p-6 flex justify-between items-center border-b border-[rgba(199,224,213,0.11)]">
           <div>
             <span className="kicker block text-[#66e3a4] text-xs font-mono tracking-widest uppercase mb-1">{kicker}</span>

@@ -6,8 +6,8 @@ export const phases = [
 ];
 
 export const directives = [
-  { title: 'Affiliate tier adjustment', source: 'CFO', priority: 'High', due: '12 min', context: 'Reduce the Core Funnel affiliate tier from 25% to 22% while contribution margin is below target.' },
-  { title: 'Onyx browser execution', source: 'Onyx', priority: 'Critical', due: '4 min', context: 'Onyx requested approval for a privileged browser action affecting an external partner workspace.' },
+  { title: 'Affiliate tier adjustment', source: 'CFO', priority: 'High', due: '12 min', context: 'Reduce the Core Funnel affiliate tier from 25% to 22% while contribution margin is below target.' , acknowledgments: [{ department: 'Finance', status: 'Pending' }] },
+  { title: 'Onyx browser execution', source: 'Onyx', priority: 'Critical', due: '4 min', context: 'Onyx requested approval for a privileged browser action affecting an external partner workspace.' , acknowledgments: [{ department: 'Engineering', status: 'Acknowledged', timestamp: '10:04 AM' }, { department: 'Operations', status: 'Pending' }] },
   { title: 'Partner cohort certification', source: 'COO', priority: 'Medium', due: 'Today', context: 'Review the latest credential and reference checks before certifying the next coach cohort.' }
 ];
 
