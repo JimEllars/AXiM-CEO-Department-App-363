@@ -108,3 +108,81 @@ export function useRealtimeTelemetry() {
 
   return state;
 }
+
+
+let telephonyChannel = null;
+let telephonySubscribers = new Set();
+let currentTelephonyEvents = [];
+
+function notifyTelephony() {
+  for (const callback of telephonySubscribers) {
+    callback(currentTelephonyEvents);
+  }
+}
+
+function playUrgentChime() {
+  try {
+    const audio = new Audio('/urgent_chime.mp3'); // Assuming an asset exists or fallback
+    audio.play().catch(() => {});
+  } catch (e) { /* ignore */ }
+}
+
+function connectTelephonyRealtime() {
+  if (!SUPABASE_URL) return;
+  if (telephonyChannel) return;
+
+  const session = readSession();
+  if (session?.token) {
+    supabase.realtime.setAuth(session.token);
+  }
+
+  telephonyChannel = supabase.channel('telephony_logs');
+
+  telephonyChannel
+    .on('broadcast', { event: '*' }, (payload) => {
+       const ev = payload.payload || payload;
+       if (ev.event === 'telephony.urgent_alert') {
+          playUrgentChime();
+       }
+
+       if (ev.event === 'telephony.call_ringing' || ev.event === 'telephony.call_completed' || ev.event === 'telephony.urgent_alert') {
+          currentTelephonyEvents = [ev, ...currentTelephonyEvents].slice(0, 50);
+          notifyTelephony();
+       }
+    })
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'telephony_logs' }, (payload) => {
+       const ev = payload.new;
+       if (ev.event === 'telephony.urgent_alert') {
+          playUrgentChime();
+       }
+       if (ev.event === 'telephony.call_ringing' || ev.event === 'telephony.call_completed' || ev.event === 'telephony.urgent_alert') {
+          currentTelephonyEvents = [ev, ...currentTelephonyEvents].slice(0, 50);
+          notifyTelephony();
+       }
+    })
+    .subscribe();
+}
+
+function disconnectTelephonyRealtime() {
+  if (telephonySubscribers.size === 0 && telephonyChannel) {
+    supabase.removeChannel(telephonyChannel);
+    telephonyChannel = null;
+  }
+}
+
+export function useTelephonyStream() {
+  const [events, setEvents] = useState(currentTelephonyEvents);
+
+  useEffect(() => {
+    telephonySubscribers.add(setEvents);
+    if (telephonySubscribers.size === 1) {
+      connectTelephonyRealtime();
+    }
+    return () => {
+      telephonySubscribers.delete(setEvents);
+      disconnectTelephonyRealtime();
+    };
+  }, []);
+
+  return events;
+}

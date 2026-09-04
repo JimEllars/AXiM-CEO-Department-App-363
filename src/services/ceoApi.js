@@ -183,3 +183,34 @@ export async function fetchVoiceFeed(signal) {
     return { feed: [] };
   }
 }
+
+export async function subscribeToDirective(directiveId) {
+  if (!workerUrl) {
+    return { subscribe: () => ({ unsubscribe: () => {} }) };
+  }
+
+  // Implement mock SSE for directive execution progress
+  return {
+    subscribe: (onMessage) => {
+       const steps = ['QUEUED', 'AGENT_SPAWNED', 'IN_PROGRESS', 'VERIFIED', 'COMPLETED'];
+       let stepIdx = 0;
+
+       const interval = setInterval(() => {
+          if (stepIdx < steps.length) {
+             onMessage({
+                status: steps[stepIdx],
+                timestamp: new Date().toISOString(),
+                snippet: `Executing step ${stepIdx + 1}: ${steps[stepIdx]}`
+             });
+             stepIdx++;
+          } else {
+             clearInterval(interval);
+          }
+       }, 2000);
+
+       return {
+          unsubscribe: () => clearInterval(interval)
+       };
+    }
+  };
+}

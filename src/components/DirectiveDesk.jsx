@@ -3,10 +3,44 @@ import * as FiIcons from 'react-icons/fi';
 import SafeIcon from '../common/SafeIcon';
 import { directives as initialDirectives } from '../data/dashboardData';
 import { readPersistedState, writePersistedState } from '../utils/persistedState';
-import { resolveDirective, dispatchDirective } from '../services/ceoApi';
+import { resolveDirective, dispatchDirective, subscribeToDirective } from '../services/ceoApi';
 import { readSession } from '../routes/AppRouter';
 
 const { FiCheck, FiClock, FiMessageSquare, FiX, FiInfo, FiAlertCircle, FiSend } = FiIcons;
+
+
+function LiveExecutionLog({ directiveId }) {
+   const [logs, setLogs] = useState([]);
+   useEffect(() => {
+      let sub;
+      subscribeToDirective(directiveId).then(s => {
+         sub = s;
+         sub.subscribe((msg) => {
+            setLogs(prev => [...prev, msg]);
+         });
+      });
+      return () => {
+         if (sub) sub.unsubscribe();
+      };
+   }, [directiveId]);
+
+   if (logs.length === 0) return null;
+
+   return (
+      <div className="mt-4 p-3 bg-black/30 rounded border border-white/5 text-xs">
+         <h4 className="font-bold text-[#84958e] mb-2 uppercase tracking-wider">Live Execution Log</h4>
+         <div className="flex flex-col gap-1">
+            {logs.map((log, i) => (
+               <div key={i} className="flex gap-2">
+                  <span className="text-[#66e3a4]">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
+                  <span className="font-bold text-white/80">{log.status}:</span>
+                  <span className="text-white/60">{log.snippet}</span>
+               </div>
+            ))}
+         </div>
+      </div>
+   );
+}
 
 function DirectiveDesk() {
   const [directives, setDirectives] = useState(() =>
@@ -20,6 +54,9 @@ function DirectiveDesk() {
   // New state for arbitrary dispatch
   const [customDirective, setCustomDirective] = useState('');
   const [dispatchStatus, setDispatchStatus] = useState(null);
+
+  const [activeDispatchLogs, setActiveDispatchLogs] = useState([]);
+
 
   useEffect(() => {
     writePersistedState('pending-directives', directives);
@@ -68,10 +105,13 @@ function DirectiveDesk() {
 
       const data = await dispatchDirective(payload);
 
+
       if (data && data.success) {
         setDispatchStatus('DISPATCHED');
         setCustomDirective('');
+        setActiveDispatchLogs(prev => [...prev, payload.directive_id]);
       } else {
+
         setDispatchStatus('FAILED');
       }
     } catch (err) {
@@ -123,6 +163,7 @@ function DirectiveDesk() {
               <SafeIcon icon={FiSend} /> Dispatch
             </button>
          </form>
+
          {dispatchStatus && (
             <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', fontWeight: 'bold', display: 'inline-block', padding: '0.25rem 0.5rem', borderRadius: '4px',
               backgroundColor: dispatchStatus === 'DISPATCHED' ? 'rgba(102, 227, 164, 0.2)' : dispatchStatus === 'IN_PROGRESS' ? 'rgba(117, 185, 255, 0.2)' : 'rgba(239, 68, 68, 0.2)',
@@ -131,6 +172,8 @@ function DirectiveDesk() {
                Status: {dispatchStatus}
             </div>
          )}
+         {activeDispatchLogs.map(id => <LiveExecutionLog key={id} directiveId={id} />)}
+
       </div>
 
       <div className="directive-list">
