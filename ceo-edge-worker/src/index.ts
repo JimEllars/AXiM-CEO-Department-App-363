@@ -380,7 +380,78 @@ function checkRateLimit(ip: string): boolean {
   return true; // allowed
 }
 
+import { ExecutiveMailer } from './services/emailService';
+
 export default {
+  async scheduled(event: ScheduledEvent, env: Env, ctx: ExecutionContext): Promise<void> {
+    const mailer = new ExecutiveMailer(env);
+
+    // Simulate fetching from satellite KVs
+    const macros = {
+      greenMachine: { yield: '$42,500', payouts: '$12,200', debt: '$450' },
+      asguard: { threats: 1420, alerts: 3 },
+      voiceCore: { calls: 1205, duration: '4m 12s', triageRate: '98%' },
+      support: { resolved: 412, sla: '99.9%', critical: 1 },
+      groundGame: { shifts: 45, doors: 1200, leads: 85 }
+    };
+
+    const dateStr = new Date().toISOString().split('T')[0];
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #101e1b; border-bottom: 2px solid #66e3a4; padding-bottom: 10px;">AXiM Executive Briefing - ${dateStr}</h2>
+
+        <h3 style="color: #07100f;">Treasury & Liquidity (Green Machine)</h3>
+        <ul>
+          <li>Net capital yield: ${macros.greenMachine.yield}</li>
+          <li>Settled affiliate payouts: ${macros.greenMachine.payouts}</li>
+          <li>Micro-app compute debt: ${macros.greenMachine.debt}</li>
+        </ul>
+
+        <h3 style="color: #07100f;">Security & Threats (Asguard)</h3>
+        <ul>
+          <li>Blocked threats: ${macros.asguard.threats}</li>
+          <li>High-severity SOC alerts: ${macros.asguard.alerts}</li>
+        </ul>
+
+        <h3 style="color: #07100f;">Voice & Telephony (Voice Core)</h3>
+        <ul>
+          <li>Total calls handled: ${macros.voiceCore.calls}</li>
+          <li>Average duration: ${macros.voiceCore.duration}</li>
+          <li>Voicemail triage rate: ${macros.voiceCore.triageRate}</li>
+        </ul>
+
+        <h3 style="color: #07100f;">Support & SLAs</h3>
+        <ul>
+          <li>Resolved tickets: ${macros.support.resolved}</li>
+          <li>SLA compliance rate: ${macros.support.sla}</li>
+          <li>Critical escalations: ${macros.support.critical}</li>
+        </ul>
+
+        <h3 style="color: #07100f;">Ground Game</h3>
+        <ul>
+          <li>Active shifts: ${macros.groundGame.shifts}</li>
+          <li>Doors knocked: ${macros.groundGame.doors}</li>
+          <li>Appointments booked: ${macros.groundGame.leads}</li>
+        </ul>
+
+        <p style="font-size: 12px; color: #888; margin-top: 30px; border-top: 1px solid #eee; padding-top: 10px;">
+          Generated automatically by AXiM Core Edge Worker
+        </p>
+      </div>
+    `;
+
+    try {
+      await mailer.sendAlert({
+        to: 'james.ellars@axim.us.com',
+        subject: `[AXiM Executive Briefing] Daily Cross-Ecosystem Briefing - ${dateStr}`,
+        html: html
+      });
+      console.log('Daily briefing dispatched successfully.');
+    } catch (err) {
+      console.error('Failed to dispatch daily briefing:', err);
+    }
+  },
+
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
     const startTime = Date.now();
 

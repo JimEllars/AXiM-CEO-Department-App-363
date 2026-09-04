@@ -7,6 +7,9 @@
   "observability": {
     "enabled": true
   },
+  "triggers": {
+    "crons": ["0 12 * * *"]
+  },
   "kv_namespaces": [
     {
       "binding": "CEO_TELEMETRY_KV",

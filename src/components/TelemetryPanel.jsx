@@ -78,14 +78,14 @@ function TelemetryPanel({ search = '', events = [] }) {
 
   return (
     <>
-      <section className="panel telemetry-panel bg-[#101e1b] border border-[rgba(199,224,213,0.11)] rounded-2xl p-6 shadow-xl flex flex-col h-full max-h-[600px]">
+      <section className="panel telemetry-panel backdrop-blur-md bg-slate-900/85 border border-slate-800 rounded-2xl p-6 shadow-xl shadow-black/40 flex flex-col h-full max-h-[600px]">
         <div className="panel-heading flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 shrink-0">
           <div>
             <span className="kicker block text-[#66e3a4] text-xs font-mono tracking-widest uppercase mb-1">Cross-departmental mesh</span>
             <h2 className="text-2xl font-bold tracking-tight">Live telemetry</h2>
           </div>
           <button
-            className="text-button flex items-center gap-2 px-4 py-2 bg-[rgba(102,227,164,0.1)] text-[#66e3a4] rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(102,227,164,0.2)] disabled:opacity-50"
+            className="text-button flex items-center gap-2 px-4 py-2 bg-emerald-500/10 text-emerald-400 rounded-lg text-sm font-semibold transition-colors hover:bg-[rgba(102,227,164,0.2)] disabled:opacity-50"
             type="button"
             onClick={() => setSelected(filtered[0] || (source && source[0]))}
             disabled={!source.length}
@@ -143,7 +143,7 @@ function TelemetryPanel({ search = '', events = [] }) {
                   <b className="block text-sm font-semibold text-[#e8efeb] truncate">{item.event}</b>
                   <small className="block text-xs text-[#84958e] mt-1">{item.time} · AXiM Core</small>
                 </div>
-                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono whitespace-nowrap ${isHealthy ? "bg-[rgba(102,227,164,0.1)] text-[#66e3a4]" : isCritical ? "bg-[rgba(239,68,68,0.1)] text-red-400" : "bg-[rgba(242,185,107,0.1)] text-[#f2b96b]"}`}>
+                <span className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono whitespace-nowrap ${isHealthy ? "bg-[rgba(102,227,164,0.1)] text-[#66e3a4]" : isCritical ? "bg-red-500/10 text-red-400" : "bg-amber-500/10 text-amber-400"}`}>
                   <SafeIcon icon={FiRadio} /> {item.state}
                 </span>
               </article>

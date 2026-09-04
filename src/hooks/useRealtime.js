@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { readSession } from '../routes/AppRouter';
+import { readPersistedState, writePersistedState } from '../utils/persistedState';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -12,7 +13,7 @@ let subscribers = new Set();
 let isConnected = false;
 let retryCount = 0;
 let retryTimeout = null;
-let currentMetrics = {
+let currentMetrics = readPersistedState('telemetry-metrics', {
   grossRevenue: 0,
   contributionMargin: 77.6,
   activeAgents: 0,
@@ -20,7 +21,7 @@ let currentMetrics = {
   edgeLatency: 84,
   blockedThreats: 0,
   echoDlq: 0
-};
+});
 
 function notify() {
   for (const callback of subscribers) {
@@ -43,6 +44,7 @@ function connectRealtime() {
     .on('broadcast', { event: '*' }, (payload) => {
       if (payload.payload) {
         currentMetrics = { ...currentMetrics, ...payload.payload };
+        writePersistedState('telemetry-metrics', currentMetrics);
         notify();
       }
     })
@@ -50,6 +52,7 @@ function connectRealtime() {
       // Keeping a fallback increment for mock/testing if it's just a generic DB change
       if (payload.new && Object.keys(payload.new).length > 0) {
          currentMetrics = { ...currentMetrics, ...payload.new };
+         writePersistedState('telemetry-metrics', currentMetrics);
       } else {
          currentMetrics = {
             ...currentMetrics,
@@ -58,6 +61,7 @@ function connectRealtime() {
             blockedThreats: currentMetrics.blockedThreats + Math.floor(Math.random() * 5)
          };
       }
+      writePersistedState('telemetry-metrics', currentMetrics);
       notify();
     })
     .subscribe((status) => {
@@ -66,12 +70,12 @@ function connectRealtime() {
         retryCount = 0;
         notify();
       } else if (status === 'CLOSED' || status === 'CHANNEL_ERROR') {
-        isConnected = false;
+        isConnected = "reconnecting";
         notify();
         sharedChannel = null;
 
         // Exponential backoff
-        const delay = Math.min(1000 * (2 ** retryCount), 30000);
+        const delay = Math.min(1000 * (2 ** retryCount), 10000); // capped at 10s max
         retryCount++;
         clearTimeout(retryTimeout);
         retryTimeout = setTimeout(connectRealtime, delay);

@@ -61,7 +61,7 @@ function MetricGrid() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg animate-pulse h-[178px]"
+            className="metric-card relative p-6 backdrop-blur-md bg-slate-900/85 rounded-xl border border-slate-800 overflow-hidden shadow-xl shadow-black/40 animate-pulse h-[178px]"
           >
             <div className="flex justify-between items-center mb-4">
               <div className="h-4 bg-[#84958e]/20 rounded w-1/2"></div>
@@ -91,7 +91,7 @@ function MetricGrid() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg h-[178px]"
+            className="metric-card relative p-6 backdrop-blur-md bg-slate-900/85 rounded-xl border border-slate-800 overflow-hidden shadow-xl shadow-black/40 h-[178px]"
           >
             <div className="metric-top flex justify-between items-center mb-3 text-sm text-[#84958e] font-semibold tracking-wider uppercase">
               <span>---</span>
@@ -120,7 +120,7 @@ function MetricGrid() {
 
         return (
           <motion.article
-            className="metric-card relative p-6 bg-[#101e1b] rounded-xl border border-[rgba(199,224,213,0.11)] overflow-hidden shadow-lg transition-transform hover:-translate-y-1 h-[178px]"
+            className="metric-card relative p-6 backdrop-blur-md bg-slate-900/85 rounded-xl border border-slate-800 overflow-hidden shadow-xl shadow-black/40 transition-transform hover:-translate-y-1 h-[178px]"
             key={metric.label || index}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

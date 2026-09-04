@@ -189,6 +189,22 @@ function DirectiveDesk() {
               <div>
                 <b>{item.title}</b>
                 <small>{item.source} · {item.priority} priority</small>
+                {/* Acknowledgment Badges */}
+                <div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  {(item.acknowledgments || []).map(ack => {
+                     const isAck = ack.status === 'Acknowledged';
+                     return (
+                        <span key={ack.department} style={{
+                           fontSize: '0.65rem', padding: '2px 6px', borderRadius: '4px', fontWeight: 'bold',
+                           backgroundColor: isAck ? 'rgba(102, 227, 164, 0.2)' : 'rgba(132, 149, 142, 0.2)',
+                           color: isAck ? '#66e3a4' : '#84958e',
+                           border: `1px solid ${isAck ? 'rgba(102,227,164,0.3)' : 'rgba(132,149,142,0.3)'}`
+                        }}>
+                           {ack.department}: {ack.status} {isAck && ack.timestamp ? `(${ack.timestamp})` : ''}
+                        </span>
+                     )
+                  })}
+                </div>
               </div>
               <span className="due">
                 <SafeIcon icon={FiClock} /> {item.due}
